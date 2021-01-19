@@ -2,6 +2,13 @@
 
 extern struct loc_flags lflags;  // все булевые флаги кучей
 
+// typedef enum{
+//     select_none 0,
+//     select_pwm 3,
+// }select_ch_t;
+
+
+
 
 static boolean inline is_on(point p){
     return p.y < 0x80;
@@ -181,15 +188,21 @@ static void pan_toggle(){
 
     uint16_t ch_raw;
 
-    if(sets.ch_toggle <= 2){ // disabled
-	return;
+    if(sets.ch_toggle <= 2)
+    { // disabled
+	    return;
 #ifdef PWM_PIN
-    } else if(sets.ch_toggle == 3) {
-	ch_raw = PWM_IN;	// 1 - используем внешний PWM для переключения экранов
+    } 
+    else if(sets.ch_toggle == 3) 
+    {
+    	ch_raw = PWM_IN;	// 1 - используем внешний PWM для переключения экранов
 #endif
-    } else if(sets.ch_toggle >= 5 && sets.ch_toggle <= 8){
-	ch_raw = chan_raw[sets.ch_toggle-1];
-    } else {
+    } 
+    else if(sets.ch_toggle >= 5 && sets.ch_toggle <= 8)
+    {
+	    ch_raw = chan_raw[sets.ch_toggle-1];
+    } else 
+    {
         ch_raw = chan_raw[7]; // в случае мусора - канал 8
     }
     
@@ -200,27 +213,33 @@ static void pan_toggle(){
     if(ch_raw > ch_max) ch_max = ch_raw;
 
 //	автоматическое управление OSD  (если режим не RTL или CIRCLE) смена режима туда-сюда переключает экран
-    if (sets.ch_toggle == 4){
-      if ((osd_mode != 6) && (osd_mode != 7)){
-        if (osd_off_switch != osd_mode){
+    if (sets.ch_toggle == 4)
+    {
+      if ((osd_mode != 6) && (osd_mode != 7))
+      {
+        if (osd_off_switch != osd_mode)
+        {
             osd_off_switch = osd_mode;
             millis_plus(&osd_switch_time,0); //osd_switch_time = millis();
-            if (osd_off_switch == osd_switch_last){
+            if (osd_off_switch == osd_switch_last)
+            {
               lflags.rotatePanel = 1;
             }
         }
-        if ( time_since(&osd_switch_time) > 2000){
+        if ( time_since(&osd_switch_time) > 2000)
+        {
           osd_switch_last = osd_mode;
         }
       }
     }
-    else  {
+    else  
+    {
       if (!sets.switch_mode){  //Switch mode by value
         /*
 	    Зазор канала = диапазон изменения / (число экранов+1)
 	    текущий номер = приращение канала / зазор
         */
-        int d = (ch_max-ch_min)/sets.n_screens;
+        int d = (ch_max-ch_min)/(sets.n_screens-1);     //kmw -1 to remove config screen
         byte n = ch_raw>ch_min ?(ch_raw-ch_min)/d : 0 ;
         //First panel
         if ( panelN != n) {
